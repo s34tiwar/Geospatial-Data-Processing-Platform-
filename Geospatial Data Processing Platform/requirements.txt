@@ -1,0 +1,11 @@
+flask # Or fastapi, django, etc.
+psycopg2-binary # Python PostgreSQL adapter
+python-dotenv # For local environment variables (optional but good practice)
+mapbox # If you use Mapbox's official Python SDK
+shapely # For geospatial operations in Python
+
+## for scripts 
+requests
+urllib3 # we might need this if requests has issues; request usually pull it 
+
+planet 
