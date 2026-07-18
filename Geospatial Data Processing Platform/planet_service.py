@@ -9,7 +9,7 @@ import boto3
 # --- Planet API Configuration ---
 PLANET_API_KEY = os.getenv('PL_API_KEY')
 if not PLANET_API_KEY:
-    raise ValueError("PL_API_KEY environment variable not set in planet_services.py.")
+    print("INFO: PL_API_KEY is not configured. Planet imagery integration is disabled.")
 
 PLANET_SEARCH_URL = "https://api.planet.com/data/v1/quick-search"
 PLANET_ASSETS_URL_TEMPLATE = "https://api.planet.com/data/v1/item-types/{item_type}/items/{item_id}/assets/"
@@ -31,6 +31,8 @@ else:
 
 
 def planet_search_imagery(aoi_geojson, days_back=1000, cloud_cover_limit=0.90):
+    if not PLANET_API_KEY:
+        return []
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"api-key {PLANET_API_KEY}"
@@ -93,7 +95,7 @@ def planet_search_imagery(aoi_geojson, days_back=1000, cloud_cover_limit=0.90):
     print(f"  Item types: {search_request['item_types']}")
     print(f"  Filter types: {[f['type'] for f in search_request['filter']['config']]}")
 
-    response = requests.post(PLANET_SEARCH_URL, json=search_request, headers=headers)
+    response = requests.post(PLANET_SEARCH_URL, json=search_request, headers=headers, timeout=30)
     response.raise_for_status()
     search_results = response.json()
 
@@ -110,7 +112,7 @@ def activate_asset(item_type, item_id, asset_key):
         "Authorization": f"api-key {PLANET_API_KEY}"
         
     }
-    response = requests.post(url, headers=headers)
+    response = requests.post(url, headers=headers, timeout=30)
     response.raise_for_status()
     return response.json()
 
@@ -123,7 +125,7 @@ def get_assets(item_type, item_id):
     headers = {
         "Authorization": f"api-key {PLANET_API_KEY}"
     }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
     return response.json()
 
@@ -150,7 +152,10 @@ def planet_search_with_filter(combined_filter):
     print(f"  Item types: {search_request['item_types']}")
     print(f"  Filter types: {[f['type'] for f in search_request['filter']['config']]}")
 
-    response = requests.post(PLANET_SEARCH_URL, json=search_request, headers=headers)
+    if not PLANET_API_KEY:
+        return []
+
+    response = requests.post(PLANET_SEARCH_URL, json=search_request, headers=headers, timeout=30)
     
     if response.status_code != 200:
         print(f"Planet API Error {response.status_code}: {response.text}")
@@ -170,12 +175,20 @@ def get_and_process_planet_imagery(aoi_geojson, days_back=30, cloud_cover_limit=
         print("No AOI GeoJSON provided.")
         return None
 
+    if not PLANET_API_KEY:
+        print("Planet imagery skipped because PL_API_KEY is not configured.")
+        return None
+
+    if days_back < 1:
+        raise ValueError("days_back must be at least 1")
+    if not 0 <= cloud_cover_limit <= 1:
+        raise ValueError("cloud_cover_limit must be between 0 and 1")
+
     try:
-        # Use hardcoded date range for testing - extend to 2020-2024 for better coverage
-        start_date = datetime(2020, 1, 1, 0, 0, 0)
-        end_date = datetime(2024, 12, 31, 23, 59, 59)
-        
-        print(f"Using hardcoded date range: {start_date} to {end_date}")
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=days_back)
+
+        print(f"Searching date range: {start_date} to {end_date}")
 
         date_range_filter = {
             "type": "DateRangeFilter",
@@ -186,12 +199,11 @@ def get_and_process_planet_imagery(aoi_geojson, days_back=30, cloud_cover_limit=
             }
         }
 
-        # Relax cloud cover filter to 50% for better coverage
         cloud_cover_filter = {
             "type": "RangeFilter",
             "field_name": "cloud_cover",
             "config": {
-                "lte": 0.5  # Changed from 0.1 to 0.5 (50% cloud cover)
+                "lte": cloud_cover_limit
             }
         }
 
@@ -214,7 +226,7 @@ def get_and_process_planet_imagery(aoi_geojson, days_back=30, cloud_cover_limit=
             "config": [geometry_filter, date_range_filter, cloud_cover_filter]
         }
 
-        print(f"Searching Planet API for imagery in AOI with cloud limit 0.5 and date range {start_date.isoformat()}Z to {end_date.isoformat()}Z")
+        print(f"Searching Planet API for imagery in AOI with cloud limit {cloud_cover_limit} and date range {start_date.isoformat()}Z to {end_date.isoformat()}Z")
 
         # You need a function here that does the actual API call with combined_filter,
         # e.g. planet_search_with_filter(combined_filter)
@@ -347,7 +359,7 @@ def get_and_process_planet_imagery(aoi_geojson, days_back=30, cloud_cover_limit=
         print(f"Attempting to download {item_id} asset '{asset_key}' to {local_filename}...")
         
         try:
-            response = requests.get(download_url, stream=True)
+            response = requests.get(download_url, stream=True, timeout=120)
             response.raise_for_status()
 
             with open(local_filename, 'wb') as f:
@@ -408,8 +420,16 @@ def check_planet_api_key_validity():
     """
     Checks if the Planet API key is valid by making a simple authenticated request.
     """
+    if not PLANET_API_KEY:
+        print("Planet API key is not configured.")
+        return False
+
     url = "https://api.planet.com/data/v1"
-    response = requests.get(url, auth=(PLANET_API_KEY, ""))
+    try:
+        response = requests.get(url, auth=(PLANET_API_KEY, ""), timeout=10)
+    except requests.RequestException as error:
+        print(f"Planet API key validation failed: {error}")
+        return False
     
     print(f"Planet API Key Validation Status Code: {response.status_code}")
     if response.status_code == 200:

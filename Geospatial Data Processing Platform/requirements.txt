@@ -1,11 +1,13 @@
-flask # Or fastapi, django, etc.
-psycopg2-binary # Python PostgreSQL adapter
-python-dotenv # For local environment variables (optional but good practice)
-mapbox # If you use Mapbox's official Python SDK
-shapely # For geospatial operations in Python
+# API runtime
+Flask>=2.3,<4.0
+python-dotenv>=1.0,<2.0
 
-## for scripts 
-requests
-urllib3 # we might need this if requests has issues; request usually pull it 
+# Geospatial pipeline
+requests>=2.31,<3.0
+shapely>=2.0,<3.0
+psycopg2-binary>=2.9,<3.0
 
-planet 
+# Optional imagery integrations used by the service modules
+boto3>=1.34,<2.0
+mapbox>=0.18,<1.0
+planet>=2.9,<3.0

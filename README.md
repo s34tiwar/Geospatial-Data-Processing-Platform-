@@ -39,7 +39,8 @@ flowchart LR
 | --- | --- |
 | [`docs/`](docs/) | Zero-dependency interactive product simulation, ready for GitHub Pages |
 | [`Geospatial Data Processing Platform/main.py`](Geospatial%20Data%20Processing%20Platform/main.py) | OSM ingestion, spatial filtering, geocoding, imagery retrieval, and persistence |
-| [`Geospatial Data Processing Platform/app.py`](Geospatial%20Data%20Processing%20Platform/app.py) | Flask backend and Postgres connectivity check |
+| [`Geospatial Data Processing Platform/app.py`](Geospatial%20Data%20Processing%20Platform/app.py) | Versioned Flask API, health reporting, request tracing, and PostGIS probe |
+| [`Geospatial Data Processing Platform/demo_service.py`](Geospatial%20Data%20Processing%20Platform/demo_service.py) | Typed, deterministic scan engine powering the credential-free API |
 | [`Geospatial Data Processing Platform/planet_service.py`](Geospatial%20Data%20Processing%20Platform/planet_service.py) | Planet imagery search and processing |
 | [`Geospatial Data Processing Platform/sentinel_service.py`](Geospatial%20Data%20Processing%20Platform/sentinel_service.py) | Sentinel Hub imagery integration |
 
@@ -64,6 +65,29 @@ python app.py
 ```
 
 Database and imagery integrations require environment variables such as `POSTGRES_*`, `MAPBOX_TOKEN`, `PL_API_KEY`, and optional AWS credentials. Never commit those values.
+
+The backend starts in demo mode when those integrations are not configured. Try a scan:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/scans \
+  -H "Content-Type: application/json" \
+  -d '{"area":"waterloo","minimum_score":75,"signals":["ponding","patching"]}'
+```
+
+API endpoints:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/health` | Runtime mode and integration readiness |
+| `GET` | `/api/v1/areas` | Available sample scan areas |
+| `POST` | `/api/v1/scans` | Filtered, ranked and paginated opportunity scan |
+| `GET` | `/api/v1/database/status` | Safe PostGIS connectivity probe |
+
+Run the API contract tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
 
 ## Current status
 

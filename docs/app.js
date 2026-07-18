@@ -33,19 +33,33 @@ const datasets = {
 };
 
 const labels = { ponding: "Possible ponding", patching: "Surface patching", discoloration: "Discoloration" };
+const areaInfo = {
+  waterloo: { size: "2.4 km²", footprints: 148 },
+  kitchener: { size: "1.8 km²", footprints: 126 },
+  cambridge: { size: "3.1 km²", footprints: 213 }
+};
 const area = document.querySelector("#area");
 const threshold = document.querySelector("#threshold");
 const thresholdOutput = document.querySelector("#threshold-output");
 const scanButton = document.querySelector("#scan-button");
+const mapStartButton = document.querySelector("#map-start-button");
 const scanLine = document.querySelector("#scan-line");
 const emptyState = document.querySelector("#scan-empty");
 const markers = document.querySelector("#markers");
 const results = document.querySelector("#results");
 const resultsBody = document.querySelector("#results-body");
-const resultCount = document.querySelector("#result-count");
+const scanSummary = document.querySelector("#scan-summary");
+const scanProgress = document.querySelector("#scan-progress");
+const progressBar = document.querySelector("#progress-bar");
+const progressPercent = document.querySelector("#progress-percent");
+const progressStage = document.querySelector("#progress-stage");
+const leadDetail = document.querySelector("#lead-detail");
+const mapTitle = document.querySelector("#map-title");
 const mapSubtitle = document.querySelector("#map-subtitle");
+const areaSize = document.querySelector("#area-size");
 const toast = document.querySelector("#toast");
 let visibleLeads = [];
+let scanTimer;
 
 const scoreClass = score => score >= 80 ? "high" : score >= 60 ? "medium" : "low";
 
@@ -88,12 +102,15 @@ function render() {
     resultsBody.append(row);
   });
 
-  resultCount.textContent = visibleLeads.length;
   results.hidden = false;
+  scanSummary.hidden = false;
+  document.querySelector("#summary-analyzed").textContent = areaInfo[area.value].footprints;
+  document.querySelector("#summary-matches").textContent = visibleLeads.length;
   emptyState.hidden = visibleLeads.length > 0;
   if (!visibleLeads.length) {
     emptyState.querySelector("strong").textContent = "No matching properties";
     emptyState.querySelector("small").textContent = "Lower the score or include more signals, then scan again.";
+    mapStartButton.textContent = "Adjust criteria and rescan";
   }
 
   document.querySelectorAll(".view-on-map").forEach(button => button.addEventListener("click", () => focusLead(Number(button.dataset.id))));
@@ -104,22 +121,58 @@ function focusLead(id) {
   if (!lead) return;
   const marker = [...markers.children].find(item => item.getAttribute("aria-label").startsWith(lead.name));
   marker?.focus();
-  document.querySelector("#workspace").scrollIntoView({ behavior: "smooth", block: "center" });
+  document.querySelector("#detail-name").textContent = lead.name;
+  document.querySelector("#detail-address").textContent = lead.address;
+  document.querySelector("#detail-score").textContent = `${lead.score}/100`;
+  document.querySelector("#detail-area").textContent = `${lead.area.toLocaleString()} m²`;
+  document.querySelector("#detail-signals").innerHTML = lead.signals.map(signal => `<span class="signal">${labels[signal]}</span>`).join("");
+  leadDetail.hidden = false;
+  document.querySelector("#simulator").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function runScan() {
+  window.clearInterval(scanTimer);
+  const steps = document.querySelectorAll(".setup-step");
+  const stepLines = document.querySelectorAll(".setup-line");
+  steps.forEach((step, index) => {
+    step.classList.toggle("complete", index < 2);
+    step.classList.toggle("active", index === 2);
+  });
+  stepLines.forEach(line => line.classList.add("complete"));
   scanButton.disabled = true;
   scanButton.querySelector(".button-label").textContent = "Analyzing footprints…";
   emptyState.hidden = true;
+  leadDetail.hidden = true;
   markers.replaceChildren();
   results.hidden = true;
+  scanSummary.hidden = true;
+  scanProgress.hidden = false;
+  progressBar.style.width = "0%";
+  progressPercent.textContent = "0%";
+  progressStage.textContent = "Loading building footprints…";
   scanLine.classList.remove("active");
   void scanLine.offsetWidth;
   scanLine.classList.add("active");
+
+  const started = performance.now();
+  let progress = 0;
+  scanTimer = window.setInterval(() => {
+    progress = Math.min(progress + 8, 96);
+    progressBar.style.width = `${progress}%`;
+    progressPercent.textContent = `${progress}%`;
+    if (progress >= 72) progressStage.textContent = "Ranking opportunity signals…";
+    else if (progress >= 38) progressStage.textContent = "Comparing imagery and roof geometry…";
+  }, 130);
+
   window.setTimeout(() => {
+    window.clearInterval(scanTimer);
+    progressBar.style.width = "100%";
+    progressPercent.textContent = "100%";
     render();
+    scanProgress.hidden = true;
     scanButton.disabled = false;
-    scanButton.querySelector(".button-label").textContent = "Run simulated scan";
+    scanButton.querySelector(".button-label").textContent = "Run scan again";
+    document.querySelector("#summary-time").textContent = `${((performance.now() - started) / 1000).toFixed(1)}s`;
     showToast(`${visibleLeads.length} sample opportunities found in ${datasets[area.value].name}.`);
   }, 1800);
 }
@@ -132,10 +185,25 @@ function showToast(message) {
 
 threshold.addEventListener("input", () => thresholdOutput.value = threshold.value);
 area.addEventListener("change", () => {
-  mapSubtitle.textContent = datasets[area.value].subtitle;
+  mapTitle.textContent = datasets[area.value].name;
+  mapSubtitle.textContent = "Commercial and industrial buildings";
+  areaSize.textContent = areaInfo[area.value].size;
+  emptyState.querySelector("strong").textContent = `Ready to analyze ${areaInfo[area.value].footprints} sample footprints`;
+  emptyState.querySelector("small").textContent = "Set your criteria and click “Start roof scan.”";
+  mapStartButton.textContent = "Start scan";
   if (!results.hidden) runScan();
 });
 scanButton.addEventListener("click", runScan);
+mapStartButton.addEventListener("click", runScan);
+document.querySelector("#detail-close").addEventListener("click", () => leadDetail.hidden = true);
+
+document.querySelectorAll(".layer-control button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".layer-control button").forEach(item => item.classList.remove("selected"));
+    button.classList.add("selected");
+    document.querySelector("#map-canvas").classList.toggle("footprint-mode", button.textContent === "Footprints");
+  });
+});
 
 document.querySelector("#export-button").addEventListener("click", () => {
   const header = ["Property", "Address", "Roof area (m2)", "Signals", "Synthetic opportunity score"];

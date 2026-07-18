@@ -4,127 +4,162 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MapWork.ai interactive commercial roof lead simulation.">
-  <title>MapWork.ai — Roof intelligence from above</title>
+  <title>MapWork.ai — Commercial roof intelligence</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#" aria-label="MapWork.ai home">
-      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+    <a class="brand" href="#top" aria-label="MapWork.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 10 16 4l12 6-12 6L4 10Z"/><path d="m4 16 12 6 12-6M4 22l12 6 12-6"/></svg>
       <span>MapWork<span>.ai</span></span>
     </a>
     <nav aria-label="Primary navigation">
-      <a href="#how-it-works">How it works</a>
-      <a href="#workspace">Simulation</a>
-      <a class="repo-link" href="https://github.com/s34tiwar/Geospatial-Data-Processing-Platform-" target="_blank" rel="noreferrer">View source <span aria-hidden="true">↗</span></a>
+      <a href="#method">How it works</a>
+      <a href="https://github.com/s34tiwar/Geospatial-Data-Processing-Platform-" target="_blank" rel="noreferrer">GitHub ↗</a>
     </nav>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="hero-copy">
-        <div class="eyebrow"><span></span> Geospatial intelligence for roofers</div>
-        <h1>Find the roofs that<br><em>need you most.</em></h1>
-        <p>MapWork turns building footprints and satellite signals into a focused list of commercial roofing opportunities—so teams spend less time searching and more time helping.</p>
-        <div class="hero-actions">
-          <a class="button primary" href="#workspace">Run a roof scan <span>→</span></a>
-          <a class="text-link" href="#how-it-works">See the pipeline <span>↓</span></a>
-        </div>
-        <div class="trust-row" aria-label="Product capabilities">
-          <span><b>3</b> geospatial data sources</span>
-          <span><b>&lt;300ms</b> target API response</span>
-          <span><b>Human</b> review by design</span>
-        </div>
+  <main id="top">
+    <section class="intro">
+      <div>
+        <span class="product-label">Interactive prototype</span>
+        <h1>Find commercial roofs worth a closer look.</h1>
+        <p>Scan sample building footprints, review possible roof-condition signals, and export a focused prospect list.</p>
       </div>
-
-      <div class="orbital-card" aria-label="Stylized satellite analysis preview">
-        <div class="orbit orbit-one"></div>
-        <div class="orbit orbit-two"></div>
-        <div class="satellite-grid"></div>
-        <div class="roof roof-a"><span>92</span></div>
-        <div class="roof roof-b"><span>74</span></div>
-        <div class="roof roof-c"><span>58</span></div>
-        <div class="scan-beam"></div>
-        <div class="floating-label"><span></span> Live analysis preview</div>
-        <div class="coordinates">43.4516° N<br>80.4925° W</div>
-      </div>
+      <a href="#simulator" class="jump-button">Start simulation <span>↓</span></a>
     </section>
 
-    <section class="steps" id="how-it-works">
-      <article><span>01</span><div><h2>Discover</h2><p>Collect industrial zones and commercial building footprints from open geospatial data.</p></div></article>
-      <article><span>02</span><div><h2>Analyze</h2><p>Pair footprints with imagery and rank visual signals that deserve a closer look.</p></div></article>
-      <article><span>03</span><div><h2>Act</h2><p>Give contractors an explainable shortlist with addresses, context, and confidence.</p></div></article>
-    </section>
+    <section class="simulator" id="simulator">
+      <div class="simulator-header">
+        <div>
+          <div class="live-label"><i></i> Simulation workspace</div>
+          <h2>Roof opportunity scan</h2>
+        </div>
+        <p><strong>Demo data</strong> · Synthetic scores · No sign-in or API key needed</p>
+      </div>
 
-    <section class="workspace-section" id="workspace">
-      <div class="section-heading">
-        <div><div class="eyebrow"><span></span> Interactive simulation</div><h2>Scan an industrial area</h2></div>
-        <p>This product demo uses synthetic roof signals and sample Waterloo Region properties. It demonstrates the workflow—not a professional inspection.</p>
+      <div class="setup-strip" aria-label="Simulation instructions">
+        <div class="setup-step active"><span>1</span><p><b>Choose an area</b><small>Select a sample industrial district</small></p></div>
+        <div class="setup-line"></div>
+        <div class="setup-step"><span>2</span><p><b>Set criteria</b><small>Choose the signals you care about</small></p></div>
+        <div class="setup-line"></div>
+        <div class="setup-step"><span>3</span><p><b>Run scan</b><small>Review and export the shortlist</small></p></div>
       </div>
 
       <div class="workspace">
         <aside class="controls">
-          <div class="control-heading"><span>Scan parameters</span><span class="status-dot">Demo mode</span></div>
-          <label for="area">Industrial area</label>
-          <div class="select-wrap">
+          <div class="control-group">
+            <label for="area">Search area</label>
             <select id="area">
               <option value="waterloo">North Waterloo</option>
               <option value="kitchener">Kitchener Innovation District</option>
               <option value="cambridge">Cambridge Industrial Park</option>
             </select>
+            <div class="area-meta"><span>Waterloo Region, ON</span><span id="area-size">2.4 km²</span></div>
           </div>
 
-          <div class="range-label"><label for="threshold">Minimum opportunity score</label><output id="threshold-output" for="threshold">65</output></div>
-          <input type="range" id="threshold" min="40" max="90" value="65" step="5">
-          <div class="range-scale"><span>Broader</span><span>Stronger</span></div>
+          <div class="control-group">
+            <div class="range-label"><label for="threshold">Minimum score</label><output id="threshold-output" for="threshold">65</output></div>
+            <input type="range" id="threshold" min="40" max="90" value="65" step="5">
+            <div class="range-scale"><span>More results</span><span>Higher confidence</span></div>
+          </div>
 
-          <fieldset>
-            <legend>Include signals</legend>
-            <label class="check"><input type="checkbox" value="ponding" checked><span></span> Possible water ponding</label>
-            <label class="check"><input type="checkbox" value="patching" checked><span></span> Surface patching</label>
-            <label class="check"><input type="checkbox" value="discoloration" checked><span></span> Discoloration</label>
+          <fieldset class="control-group">
+            <legend>Roof signals</legend>
+            <label class="check"><input type="checkbox" value="ponding" checked><span></span><p>Possible ponding<small>Standing-water patterns</small></p></label>
+            <label class="check"><input type="checkbox" value="patching" checked><span></span><p>Surface patching<small>Repair or material variation</small></p></label>
+            <label class="check"><input type="checkbox" value="discoloration" checked><span></span><p>Discoloration<small>Uneven surface reflectance</small></p></label>
           </fieldset>
 
-          <button class="button primary scan-button" id="scan-button"><span class="radar-icon" aria-hidden="true"></span><span class="button-label">Run simulated scan</span></button>
-          <p class="fine-print"><span aria-hidden="true">ⓘ</span> Scores are generated sample data. Always verify with a qualified roofer.</p>
+          <button class="scan-button" id="scan-button">
+            <span class="scan-icon" aria-hidden="true"></span>
+            <span class="button-label">Start roof scan</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <p class="fine-print">This prototype flags sample candidates; it does not diagnose roof damage.</p>
         </aside>
 
-        <div class="map-panel" aria-label="Simulated map of commercial roofs">
+        <div class="map-panel">
           <div class="map-toolbar">
-            <div><span class="map-title">Waterloo Region</span><span class="map-subtitle" id="map-subtitle">North Waterloo · 2.4 km²</span></div>
-            <div class="map-legend"><span><i class="high"></i> 80–100</span><span><i class="medium"></i> 60–79</span><span><i class="low"></i> Below 60</span></div>
+            <div><strong id="map-title">North Waterloo</strong><span id="map-subtitle">Commercial and industrial buildings</span></div>
+            <div class="layer-control" aria-label="Map display options"><button class="selected">Satellite</button><button>Footprints</button></div>
+            <div class="map-legend"><span><i class="high"></i> High</span><span><i class="medium"></i> Medium</span><span><i class="low"></i> Low</span></div>
           </div>
+
           <div class="map-canvas" id="map-canvas">
-            <svg class="street-map" viewBox="0 0 900 520" preserveAspectRatio="none" aria-hidden="true">
-              <g class="blocks"><path d="M0 80h170v110H0zM215 20h210v130H215zM480 0h190v110H480zM725 30h175v180H725zM30 245h230v110H30zM310 205h160v170H310zM525 170h230v135H525zM790 260h110v145H790zM0 405h180v115H0zM230 420h250v100H230zM535 360h190v160H535zM775 440h125v80H775z"/></g>
-              <g class="roads"><path d="M0 215c160-20 250 10 390-20s290-65 510 15M190 0c-15 130 30 235 10 340s5 140 25 180M480 0c30 130-5 250 25 340s18 130 15 180M720 0c-30 115 35 220 25 330s35 140 50 190M0 385c150-20 275 15 430-5s300-30 470 25"/><path class="minor" d="M0 120h900M290 0v520M640 0v520M0 470h900"/></g>
-              <g class="water"><path d="M-20 315c130-40 160-10 250-5s130-32 220-10 145 55 245 22 160-20 225 8"/></g>
+            <svg class="street-map" viewBox="0 0 900 560" preserveAspectRatio="none" aria-hidden="true">
+              <defs><pattern id="grid" width="35" height="35" patternUnits="userSpaceOnUse"><path d="M35 0H0v35" fill="none" stroke="#fff" stroke-opacity=".07"/></pattern></defs>
+              <rect width="900" height="560" fill="url(#grid)"/>
+              <g class="parcels"><path d="M-10 55h180v115H-10zM210 25h215v130H210zM472-10h195v125H472zM715 30h195v165H715zM25 230h225v125H25zM295 205h175v165H295zM518 165h230v145H518zM790 245h120v155H790zM-10 402h190v168H-10zM225 420h250v150H225zM525 365h205v205H525zM775 430h135v140H775z"/></g>
+              <g class="roofs"><path d="M35 77h92v55H35zM247 52h112v72H247zM515 21h96v61h-96zM751 67h108v82H751zM62 256h140v61H62zM326 240h104v93H326zM553 201h146v70H553zM814 278h64v86h-64zM29 439h112v86H29zM265 454h167v74H265zM561 406h124v118H561zM803 461h78v67h-78z"/></g>
+              <g class="roads"><path d="M0 198c170-22 260 12 400-20s300-58 500 18M190 0c-14 140 27 245 9 350s5 150 24 210M472 0c28 140-3 260 27 350s18 145 15 210M715 0c-28 125 32 230 24 345s32 150 48 215M0 385c155-18 280 14 435-5s305-25 465 25"/><path class="minor" d="M0 115h900M288 0v560M640 0v560M0 475h900"/></g>
+              <g class="water"><path d="M-20 326c125-40 160-8 248-4s135-30 225-8 145 50 244 20 160-18 225 8"/></g>
             </svg>
-            <div class="north">N<span>↑</span></div>
+            <div class="map-location"><span>43.4723° N</span><span>80.5369° W</span></div>
             <div class="map-scale"><i></i> 500 m</div>
             <div class="scan-line" id="scan-line"></div>
             <div id="markers"></div>
-            <div class="scan-empty" id="scan-empty"><span class="empty-radar"></span><strong>Ready to scan</strong><small>Choose your parameters, then run the simulation.</small></div>
+
+            <div class="scan-empty" id="scan-empty">
+              <span class="empty-icon"><i></i></span>
+              <strong>Ready to analyze 148 sample footprints</strong>
+              <small>Set your criteria and click “Start roof scan.”</small>
+              <button id="map-start-button">Start scan</button>
+            </div>
+
+            <div class="scan-progress" id="scan-progress" hidden>
+              <div class="progress-top"><strong>Analyzing area</strong><span id="progress-percent">0%</span></div>
+              <div class="progress-track"><i id="progress-bar"></i></div>
+              <p id="progress-stage">Loading building footprints…</p>
+            </div>
+
+            <aside class="lead-detail" id="lead-detail" hidden aria-live="polite">
+              <button class="detail-close" id="detail-close" aria-label="Close property details">×</button>
+              <span class="detail-label">Selected property</span>
+              <h3 id="detail-name"></h3>
+              <p id="detail-address"></p>
+              <div class="detail-score"><div><strong id="detail-score"></strong><span>Opportunity score</span></div><div><strong id="detail-area"></strong><span>Roof area</span></div></div>
+              <h4>Observed sample signals</h4>
+              <div id="detail-signals"></div>
+              <p class="detail-note">Synthetic prototype result. A qualified inspection is required.</p>
+            </aside>
           </div>
         </div>
       </div>
 
+      <div class="scan-summary" id="scan-summary" hidden>
+        <div><span>Footprints analyzed</span><strong id="summary-analyzed">148</strong></div>
+        <div><span>Matching properties</span><strong id="summary-matches">0</strong></div>
+        <div><span>Imagery coverage</span><strong>96%</strong></div>
+        <div><span>Simulation time</span><strong id="summary-time">1.8s</strong></div>
+      </div>
+
       <div class="results" id="results" hidden>
         <div class="results-head">
-          <div><span class="result-count" id="result-count">0</span><h3>Potential opportunities</h3><p>Ranked sample properties matching your scan settings.</p></div>
-          <button id="export-button" class="export-button">Export sample CSV <span>↓</span></button>
+          <div><h3>Opportunity shortlist</h3><p>Sample properties ranked by synthetic opportunity score.</p></div>
+          <button id="export-button" class="export-button">Export CSV ↓</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Property</th><th>Roof area</th><th>Signals</th><th>Opportunity</th><th></th></tr></thead>
+            <thead><tr><th>Property</th><th>Roof area</th><th>Signals</th><th>Score</th><th></th></tr></thead>
             <tbody id="results-body"></tbody>
           </table>
         </div>
       </div>
     </section>
+
+    <section class="method" id="method">
+      <div class="method-heading"><span>How the real pipeline works</span><h2>From an open map to a useful shortlist.</h2></div>
+      <div class="method-grid">
+        <article><span>01</span><h3>Find buildings</h3><p>Query OpenStreetMap for commercial footprints inside industrial land-use zones.</p><small>OpenStreetMap · Overpass</small></article>
+        <article><span>02</span><h3>Collect imagery</h3><p>Match each footprint with recent, low-cloud satellite imagery and location context.</p><small>Mapbox · Planet · Sentinel</small></article>
+        <article><span>03</span><h3>Rank signals</h3><p>Score visible roof-condition signals and store geometries for fast spatial search.</p><small>Python · PostGIS</small></article>
+        <article><span>04</span><h3>Review leads</h3><p>Present a focused list for human review before any contractor takes action.</p><small>Flask · Human verification</small></article>
+      </div>
+    </section>
   </main>
 
-  <footer><a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>MapWork<span>.ai</span></span></a><p>Built in Waterloo with curiosity, maps, and a lot of iteration.</p><p>Prototype · 2026</p></footer>
+  <footer><a class="brand" href="#top"><svg viewBox="0 0 32 32"><path d="M4 10 16 4l12 6-12 6L4 10Z"/><path d="m4 16 12 6 12-6M4 22l12 6 12-6"/></svg><span>MapWork<span>.ai</span></span></a><p>Prototype built in Waterloo, Ontario.</p><a href="https://github.com/s34tiwar/Geospatial-Data-Processing-Platform-">View source ↗</a></footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>
